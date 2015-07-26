@@ -1,0 +1,76 @@
+#!/usr/bin/env bash
+# -*- bash -*-
+#
+#
+action="$1"
+shift
+set -u -e -o pipefail
+TEMPLATES="/apps/js_setup/templates"
+
+case "$action" in
+
+  "help")
+    echo " ====================================================="
+    echo ""
+    echo " $ js_setup   init_bower"
+    echo ""
+    echo " ====================================================="
+    echo ""
+    exit 0
+    ;;
+
+  "init_bower")
+    name="$(basename $(pwd))"
+
+    if [[ ! -f ".gitignore" ]]; then
+      echo "/node_modules" >> .gitignore
+      echo "/scripts" >> .gitignore
+    fi
+
+    if [[ ! -f "specs.html" ]]; then
+      contents="$(cat $TEMPLATES/specs.html)"
+      echo "${contents//\{\{name\}\}/$name}" > specs.html
+      echo "=== specs.html"
+    fi
+
+    if [[ ! -f "specs.js" ]]; then
+      echo '"use strict";' > specs.js
+      echo "=== specs.js"
+    fi
+
+    if [[ ! -f "bin/$name" ]]; then
+      mkdir -p bin/
+      contents="$(cat $TEMPLATES/bin)"
+      echo "${contents//\{\{name\}\}/$name}" > bin/$name
+      chmod +x bin/$name
+      echo "=== bin/$name"
+    fi
+
+    if [[ ! -f ".bowerrc" ]]; then
+      cp "$TEMPLATES/.bowerrc"   .bowerrc
+      echo "=== .bowerrc"
+    fi
+
+    if [[ ! -d "node_modules/bower" ]]; then
+      npm install bower
+    fi
+
+    if [[ ! -f "bower.json" ]]; then
+      bin/$name bower init
+    fi
+
+    if [[ ! -d "scripts/jasmine" ]]; then
+      bin/$name bower install --save-dev jasmine
+      bin/$name bower install --save     lodash
+      bin/$name bower install --save     jquery
+    fi
+    ;;
+
+  *)
+    echo "Unknown option: $action" 1>&2
+    exit 1
+    ;;
+
+  esac
+
+
