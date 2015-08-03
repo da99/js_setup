@@ -25,6 +25,11 @@ Green='\e[0;32m'
 Orange='\e[0;33m'
 # ==============================================================
 
+jshint () {
+  echo -n "=== Running jshint: $1: "
+  ( $0 jshint "$1" && echo -e "${green}Passed${reset_color}" ) || js_failed=""
+}
+
 case "$action" in
 
   "help")
@@ -40,14 +45,18 @@ case "$action" in
     IFS=$'\n'
     re='^[0-9]+$'
 
+    for file in ./*.js
+    do
+      jshint "$file"
+    done
 
     echo "=== Watching:"
     inotifywait --quiet --monitor --event close_write  "./" "$0" | while read CHANGE
     do
       dir=$(echo "$CHANGE" | cut -d' ' -f 1)
       op=$(echo "$CHANGE" | cut -d' ' -f 2)
-      file=$(echo "$CHANGE" | cut -d' ' -f 3)
-      path="${dir}$file"
+      path="${dir}$(echo "$CHANGE" | cut -d' ' -f 3)"
+      file="$(basename $path)"
 
       echo -e "=== $CHANGE (${path})"
 
