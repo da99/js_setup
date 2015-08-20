@@ -7,12 +7,23 @@ shift
 set -u -e -o pipefail
 TEMPLATES="/apps/js_setup/templates"
 
+GREEN=$(tput setaf 2)
+GREEN_BG=$(tput setb 2)
+WHITE=$(tput setaf 7)
+BOLD_WHITE_ON_GREEN=$(tput bold)${WHITE}${GREEN_BG}
+BOLD_WHITE=$(tput bold)${WHITE}
+RESET_COLOR=$(tput sgr0)
+ORANGE='\e[0;33m'
+RED='\e[0;31m'
+BG_RED='\e[1;31m'
+
 case "$action" in
 
   "help")
     echo " ====================================================="
     echo ""
     echo " $ js_setup   init_bower"
+    echo " $ js_setup   jshint     file"
     echo ""
     echo " ====================================================="
     echo ""
@@ -63,6 +74,34 @@ case "$action" in
       bin/$name bower install --save-dev jasmine
       bin/$name bower install --save     lodash
       bin/$name bower install --save     jquery
+    fi
+    ;;
+
+  "jshint")
+    target_dir="$(pwd)"
+    this_dir=$(dirname $(dirname $0))
+    npm_dir="${this_dir}/node_modules"
+    jshint_bin="${npm_dir}/jshint/bin/jshint"
+
+    if [[ ! -f ${jshint_bin} ]]; then
+      cd $this_dir
+      echo "=== Installing jshint to $(pwd)..."
+      npm install jshint
+      cd $target_dir
+    fi
+
+    echo -n "=== Running jshint: $1: "
+
+    set +e
+    js_hint_results="$(${jshint_bin} "$1" 2>&1)"
+    js_hint_exit_code="$?"
+    set -e
+
+    if [[ js_hint_exit_code -eq "0" ]]; then
+      echo -e "${GREEN}Passed${RESET_COLOR}"
+    else
+      echo -e "${RED}Fail${RESET_COLOR}"
+      echo "$js_hint_results"
     fi
     ;;
 
