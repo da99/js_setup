@@ -78,10 +78,17 @@ case "$action" in
     ;;
 
   "jshint")
+    $0 jshint! $@ || :
+    ;;
+
+  "jshint!")
     target_dir="$(pwd)"
     this_dir=$(dirname $(dirname $0))
     npm_dir="${this_dir}/node_modules"
     jshint_bin="${npm_dir}/jshint/bin/jshint"
+
+    files="$@"
+    final_exit=""
 
     if [[ ! -f ${jshint_bin} ]]; then
       cd $this_dir
@@ -90,18 +97,33 @@ case "$action" in
       cd $target_dir
     fi
 
-    echo -n "=== Running jshint: $1: "
+    IFS=$' '
+    for file in $files
+    do
 
-    set +e
-    js_hint_results="$(${jshint_bin} "$1" 2>&1)"
-    js_hint_exit_code="$?"
-    set -e
+      if [[ ! -f "$file" ]]; then
+        echo "=== Not a file: $file" 1>&2
+        exit 1
+      fi
 
-    if [[ js_hint_exit_code -eq "0" ]]; then
-      echo -e "${GREEN}Passed${RESET_COLOR}"
-    else
-      echo -e "${RED}Fail${RESET_COLOR}"
-      echo "$js_hint_results"
+      echo -n "=== Running jshint: $file: "
+
+      set +e
+      js_hint_results="$(${jshint_bin} "$file" 2>&1)"
+      js_hint_exit_code="$?"
+      set -e
+
+      if [[ js_hint_exit_code -eq "0" ]]; then
+        echo -e "${GREEN}Passed${RESET_COLOR}"
+      else
+        echo -e "${RED}Fail${RESET_COLOR}"
+        echo "$js_hint_results"
+        final_exit="$js_hint_exit_code"
+      fi
+    done # === for file
+
+    if [[ -n "$final_exit" ]]; then
+      exit $final_exit
     fi
     ;;
 
