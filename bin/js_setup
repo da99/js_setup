@@ -5,6 +5,17 @@
 action="$1"
 shift
 set -u -e -o pipefail
+
+
+function git_is_clean {
+    if ! git_repo_is_clean
+    then
+      echo -e "\n!!! GIT repo not clean enough.\n" 1>&2
+      exit 1
+    fi
+}
+
+
 TEMPLATES="/apps/js_setup/templates"
 
 GREEN=$(tput setaf 2)
@@ -24,11 +35,44 @@ case "$action" in
     echo ""
     echo " $ js_setup   init_bower"
     echo " $ js_setup   jshint     file"
+    echo " $ js_setup   version    ..."
+    echo ""
+    echo " $ js_setup   js_zero    substring"
+    echo " $ js_setup   js_clean"
     echo ""
     echo " ====================================================="
     echo ""
     exit 0
     ;;
+
+  "js_clean")
+    js_setup js_zero console.log
+    js_setup js_zero debugger
+    ;;
+
+  "js_zero")
+    SUBSTR="$1"
+    FOUND="no"
+
+    FILES="$(find . -type f -name "*.js" -not -wholename "*/.git*" -and -not -wholename "*/bower_components/*" -and -not -wholename "*/vendor/*" -and -not -wholename "*/node_modules/*"  )"
+
+    for FILE in $FILES ; do
+      GREPS="$(grep -n "$SUBSTR" $FILE || echo '')"
+      if [ ! -z "$GREPS" ]
+      then
+        echo -e -n "\e[01;31m$FILE\e[0m " 1>&2
+        echo "contains $SUBSTR" 1>&2
+        echo "$GREPS" 1>&2
+        FOUND="yes"
+      fi
+    done
+
+    if [ "$FOUND" = "yes" ]
+    then
+      exit 1
+    fi
+    ;;
+
 
   "init_bower")
     name="$(basename $(pwd))"
@@ -75,6 +119,27 @@ case "$action" in
       bin/$name bower install --save     lodash
       bin/$name bower install --save     jquery
     fi
+    ;;
+
+  "version")
+    git push
+    js_setup js_clean
+    if [[ -f bower.json ]]; then
+      git_is_clean
+      node_modules/bower/bin/bower version $@
+      git push origin "v$(iojs -p "require('./bower').version")"
+    else
+      if [[ ! -f package.json ]] ; then
+        echo "=== No bower.json, package.json found." 1>&2
+        exit 1
+      fi
+      npm shrinkwrap
+      git_is_clean
+      npm version $@
+      git push origin "v$(iojs -p "require('./package.json').version")"
+    fi
+
+    git push
     ;;
 
   "watch")
