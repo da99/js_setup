@@ -97,7 +97,7 @@ case "$action" in
       if [[ "$path" =~ ".js" ]]; then
         if js_setup jshint! $path && [[ -f "specs.js" ]] ; then
           echo "=== Running: specs.js"
-          iojs specs.js
+          node_modules/mocha/bin/mocha specs.js || :
         fi
       fi
 
