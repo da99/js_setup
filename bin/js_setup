@@ -77,6 +77,35 @@ case "$action" in
     fi
     ;;
 
+  "watch")
+    files="$(echo ./*.js)"
+    for f in $files
+    do
+      js_setup jshint! $f
+    done
+
+    echo -e "=== Watching ${BOLD_WHITE}$(basename $(pwd))${RESET_COLOR} (proc $$)...\n"
+
+    while read CHANGE
+    do
+      dir=$(echo "$CHANGE" | cut -d' ' -f 1)
+      op=$(echo "$CHANGE" | cut -d' ' -f 2)
+      file=$(echo "$CHANGE" | cut -d' ' -f 3)
+      path="${dir}$file"
+      echo -e "=== $CHANGE ($path)"
+
+      if [[ "$path" =~ ".js" ]]; then
+        if js_setup jshint! $path && [[ -f "specs.js" ]] ; then
+          echo "=== Running: specs.js"
+          iojs specs.js
+        fi
+      fi
+
+      echo ""
+    done < <(inotifywait --quiet --monitor --event close_write  $files )
+
+    ;;
+
   "jshint")
     $0 jshint! "$@" || :
     ;;
