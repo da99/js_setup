@@ -37,7 +37,7 @@ case "$action" in
     echo " $ js_setup   jshint     file"
     echo " $ js_setup   version    ..."
     echo ""
-    echo " $ js_setup   js_zero    substring"
+    echo " $ js_setup   js_zero    extended_regexp_for_grep"
     echo " $ js_setup   js_clean"
     echo ""
     echo " ====================================================="
@@ -46,18 +46,15 @@ case "$action" in
     ;;
 
   "js_clean")
-    js_setup js_zero console.log
-    js_setup js_zero debugger
+    js_setup js_zero "console.log\(|debugger"
     ;;
 
   "js_zero")
     SUBSTR="$1"
     FOUND="no"
 
-    FILES="$(find . -type f -name "*.js" -not -wholename "*/.git*" -and -not -wholename "*/bower_components/*" -and -not -wholename "*/vendor/*" -and -not -wholename "*/node_modules/*"  )"
-
-    for FILE in $FILES ; do
-      GREPS="$(grep -n "$SUBSTR" $FILE || echo '')"
+    for FILE in $(git ls-files | grep -E '.js$') ; do
+      GREPS="$(grep -n -E "$SUBSTR" $FILE || echo '')"
       if [ ! -z "$GREPS" ]
       then
         echo -e -n "\e[01;31m$FILE\e[0m " 1>&2
