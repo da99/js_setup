@@ -40,6 +40,7 @@ case "$action" in
     echo " $ js_setup   js_zero    extended_regexp_for_grep"
     echo " $ js_setup   js_clean"
     echo ""
+    echo " $ js_setup   add_dev_log  file"
     echo " ====================================================="
     echo ""
     exit 0
@@ -47,6 +48,15 @@ case "$action" in
 
   "js_clean")
     js_setup js_zero "console.log\(|debugger"
+    ;;
+
+  "add_dev_log")
+    file="$1"
+    shift
+    if ! grep "var log;" "$file" 1>/dev/null; then
+      output=$(sed '/^$/a var log;\nlog = function () {\n  return (process.env.IS_DEV) ? console.log.apply(console, arguments) : null;\n};' $file)
+      echo -e "$output" > $file
+    fi
     ;;
 
   "js_zero")
