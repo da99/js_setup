@@ -51,7 +51,7 @@ case "$action" in
     done
 
     echo "=== Watching:"
-    inotifywait --quiet --monitor --event close_write  "./" "$0" | while read CHANGE
+    while read CHANGE
     do
       dir=$(echo "$CHANGE" | cut -d' ' -f 1)
       op=$(echo "$CHANGE" | cut -d' ' -f 2)
@@ -71,7 +71,7 @@ case "$action" in
 
         echo ""
       fi
-    done
+    done < <(inotifywait --quiet --monitor --event close_write  $(git ls-files | tr '\n' ' '))
 
     ;;
 
