@@ -134,8 +134,15 @@ case "$action" in
   "version")
     git push
     js_setup js_clean
+
+    echo "=== Updating modules..."
+    npm update
+    npm shrinkwrap
+    node_modules/mocha/bin/mocha specs.js
+
+    git_is_clean
+
     if [[ -f bower.json ]]; then
-      git_is_clean
       node_modules/bower/bin/bower version $@
       git push origin "v$(iojs -p "require('./bower').version")"
     else
@@ -143,8 +150,6 @@ case "$action" in
         echo "=== No bower.json, package.json found." 1>&2
         exit 1
       fi
-      npm shrinkwrap
-      git_is_clean
       npm version $@
       git push origin "v$(iojs -p "require('./package.json').version")"
     fi
