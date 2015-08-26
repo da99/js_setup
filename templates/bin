@@ -55,8 +55,11 @@ case "$action" in
     do
       dir=$(echo "$CHANGE" | cut -d' ' -f 1)
       op=$(echo "$CHANGE" | cut -d' ' -f 2)
-      path="${dir}$(echo "$CHANGE" | cut -d' ' -f 3)"
-      file="$(basename $path)"
+      file=$(echo "$CHANGE" | cut -d' ' -f 3)
+      path="${dir}$file"
+      # === Sometimes the file name is empty,
+      #     so we re-assign it to double check it's accuracy.
+      file=$(basename $path)
 
       echo -e "=== $CHANGE (${path})"
 
