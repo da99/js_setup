@@ -53,7 +53,7 @@ case "$action" in
   "add_dev_log")
     file="$1"
     shift
-    echo -e "\n\n/* global process */\nfunction log() {\n  return (process.env.IS_DEV) ? console.log.apply(console, arguments) : null;\n};" >> $file
+    echo -e "\n\n/* global process */\nvar log; log = function (...args) {\n  return (process.env.IS_DEV) ? console.log.apply(console, args) : null;\n};" >> $file
     exit 0
 
     if ! grep "var log;" "$file" 1>/dev/null; then
