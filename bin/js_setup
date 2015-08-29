@@ -138,7 +138,7 @@ case "$action" in
     echo "=== Updating modules..."
     npm update
     npm shrinkwrap
-    node_modules/mocha/bin/mocha specs.js
+    $0 mocha specs.js
 
     git_is_clean
 
@@ -157,12 +157,29 @@ case "$action" in
     git push
     ;;
 
+  "mocha")
+    if [[ -z "$IS_DEV" ]]; then
+      exit 1
+    fi
+    echo "=== node_modules/mocha/bin/mocha --es_staging "$@""
+    if [[ ! -f node_modules/mocha/bin/mocha ]] ; then
+      cmd="npm install mocha"
+      echo "=== $cmd"
+      $cmd
+    fi
+    node_modules/mocha/bin/mocha --es_staging "$@"
+    ;;
+
   "watch")
     files="$(echo ./*.js)"
     for f in $files
     do
       js_setup jshint! $f
     done
+
+    if [[ -n "$@" ]]; then
+      $0 mocha "$@" specs.js || :
+    fi
 
     echo -e "=== Watching ${BOLD_WHITE}$(basename $(pwd))${RESET_COLOR} (proc $$)...\n"
 
@@ -177,7 +194,7 @@ case "$action" in
       if [[ "$path" =~ ".js" ]]; then
         if js_setup jshint! $path && [[ -f "specs.js" ]] ; then
           echo "=== Running: specs.js"
-          node_modules/mocha/bin/mocha specs.js || :
+          $0 mocha "$@" specs.js || :
         fi
       fi
 
