@@ -137,6 +137,9 @@ case "$action" in
 
     echo "=== Updating modules..."
     npm update
+    # === "npm shrinkwrap" will fail if extraneous
+    #     modules are found. "npm prune" takes care
+    #     of this.
     npm prune
     npm shrinkwrap
     if [[ ! -f specs.html ]]; then
