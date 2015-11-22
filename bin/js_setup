@@ -8,11 +8,11 @@ set -u -e -o pipefail
 
 
 function git_is_clean {
-    if ! git_repo_is_clean
-    then
-      echo -e "\n!!! GIT repo not clean enough.\n" 1>&2
-      exit 1
-    fi
+  if ! git_repo_is_clean
+  then
+    echo -e "\n!!! GIT repo not clean enough.\n" 1>&2
+    exit 1
+  fi
 }
 
 
@@ -137,6 +137,7 @@ case "$action" in
 
     echo "=== Updating modules..."
     npm update
+    npm prune
     npm shrinkwrap
     if [[ ! -f specs.html ]]; then
       $0 mocha specs.js
