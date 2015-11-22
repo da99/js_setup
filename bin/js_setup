@@ -138,20 +138,22 @@ case "$action" in
     echo "=== Updating modules..."
     npm update
     npm shrinkwrap
-    $0 mocha specs.js
+    if [[ ! -f specs.html ]]; then
+      $0 mocha specs.js
+    fi
 
-    git_is_clean
+    git_repo_is_clean
 
     if [[ -f bower.json ]]; then
       node_modules/bower/bin/bower version $@
-      git push origin "v$(iojs -p "require('./bower').version")"
+      git push origin "v$(node -p "require('./bower').version")"
     else
       if [[ ! -f package.json ]] ; then
         echo "=== No bower.json, package.json found." 1>&2
         exit 1
       fi
       npm version $@
-      git push origin "v$(iojs -p "require('./package.json').version")"
+      git push origin "v$(node -p "require('./package.json').version")"
     fi
 
     git push
