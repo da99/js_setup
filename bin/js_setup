@@ -146,7 +146,11 @@ case "$action" in
       $0 mocha specs.js
     fi
 
-    git_repo_is_clean
+    if ! git_repo_is_clean; then
+      echo "=== Git repo is not clean" 1>&2
+      git status
+      exit 1
+    fi
 
     if [[ -f bower.json ]]; then
       node_modules/bower/bin/bower version $@
