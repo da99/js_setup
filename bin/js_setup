@@ -30,9 +30,8 @@ BG_RED='\e[1;31m'
 
 case "$action" in
 
-  "help")
+  "help"|"--help")
     echo " ====================================================="
-    echo ""
     echo " $ js_setup   init_bower"
     echo " $ js_setup   jshint     file"
     echo " $ js_setup   version    ..."
@@ -42,7 +41,7 @@ case "$action" in
     echo ""
     echo " $ js_setup   add_dev_log  file"
     echo " ====================================================="
-    echo ""
+    bash_setup print_help $0
     exit 0
     ;;
 
@@ -261,6 +260,35 @@ case "$action" in
     if [[ -n "$final_exit" ]]; then
       exit $final_exit
     fi
+    ;;
+
+  "list")
+    # === $ ... list
+    # === Prints available remote node versions.
+    $0 nvm "ls-remote"
+    ;;
+
+  "install")
+    # === $ ... install VERSION
+    # === Uses NVM to install a node version.
+    $0 nvm install $@
+    ;;
+
+  "nvm")
+    if ! type nvm 2>/dev/null; then
+      if [[ -d /progs/nvm ]]; then
+        cd /progs/nvm
+        git pull 1>/dev/null
+      else
+        cd /progs
+        git clone https://github.com/creationix/nvm
+        cd nvm
+      fi
+
+      source ./nvm.sh
+    fi
+    set +u
+    nvm $@
     ;;
 
   *)
