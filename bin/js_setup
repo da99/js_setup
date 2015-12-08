@@ -49,6 +49,15 @@ case "$action" in
     js_setup js_zero "console.log\(|debugger"
     ;;
 
+  "has_ts")
+    # === $ has_typescript path/to/file.js
+    # === Exit 0 if path/to/file.ts exists. Otherwise Exit 1.
+    file="$1"
+    shift
+    ts_file="$(dirname $file)/$(basename $file .js).ts"
+    [[ -f "$ts_file" ]] && exit 0
+    ;;
+
   "add_dev_log")
     file="$1"
     shift
@@ -220,10 +229,10 @@ case "$action" in
     target_dir="$(pwd)"
     this_dir=$(dirname $(dirname $0))
     npm_dir="${this_dir}/node_modules"
+    reporter="node_modules/jshint-path-reporter/index.js"
     jshint_bin="${npm_dir}/jshint/bin/jshint"
+    cmd="$jshint_bin --reporter $reporter"
 
-    files="$@"
-    final_exit=""
 
     if [[ ! -f ${jshint_bin} ]]; then
       cd $this_dir
@@ -232,34 +241,15 @@ case "$action" in
       cd $target_dir
     fi
 
-    IFS=$' '
-    for file in $files
-    do
-
-      if [[ ! -f "$file" ]]; then
-        echo "=== Not a file: $file" 1>&2
-        exit 1
-      fi
-
-      echo -n "=== Running jshint: $file: "
-
-      set +e
-      js_hint_results="$(${jshint_bin} "$file" 2>&1)"
-      js_hint_exit_code="$?"
-      set -e
-
-      if [[ js_hint_exit_code -eq "0" ]]; then
-        echo -e "${GREEN}Passed${RESET_COLOR}"
-      else
-        echo -e "${RED}Fail${RESET_COLOR}"
-        echo "$js_hint_results"
-        final_exit="$js_hint_exit_code"
-      fi
-    done # === for file
-
-    if [[ -n "$final_exit" ]]; then
-      exit $final_exit
+    if [[ ! -f "$reporter" ]]; then
+      echo "=== Installing jshint-path-reporter..."
+      npm install jshint-path-reporter
     fi
+
+    echo -n "=== Running jshint: $@: "
+    $cmd "$@"
+    # echo -e "${GREEN}Passed${RESET_COLOR}"
+    # echo -e "${RED}Fail${RESET_COLOR}"
     ;;
 
   "list")
