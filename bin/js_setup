@@ -143,15 +143,20 @@ case "$action" in
     git push
     js_setup js_clean
 
-    echo "=== Updating modules..."
-    npm update
-    # === "npm shrinkwrap" will fail if extraneous
-    #     modules are found. "npm prune" takes care
-    #     of this.
-    npm prune
-    npm shrinkwrap
+    if [[ -f package.json ]]; then
+      echo "=== Updating modules..."
+      npm update
+      # === "npm shrinkwrap" will fail if extraneous
+      #     modules are found. "npm prune" takes care
+      #     of this.
+      npm prune
+      npm shrinkwrap
+    fi
+
     if [[ ! -f specs.html ]]; then
-      $0 mocha specs.js
+      if [[ -f specs.js ]]; then
+        $0 mocha specs.js
+      fi
     fi
 
     if ! git_repo_is_clean; then
@@ -161,15 +166,13 @@ case "$action" in
     fi
 
     if [[ -f bower.json ]]; then
-      node_modules/bower/bin/bower version $@
+      bower version $@
       git push origin "v$(node -p "require('./bower').version")"
     else
-      if [[ ! -f package.json ]] ; then
-        echo "=== No bower.json, package.json found." 1>&2
-        exit 1
+      if [[ -f package.json ]] ; then
+        npm version $@
+        git push origin "v$(node -p "require('./package.json').version")"
       fi
-      npm version $@
-      git push origin "v$(node -p "require('./package.json').version")"
     fi
 
     git push
