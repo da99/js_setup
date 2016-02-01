@@ -264,16 +264,28 @@ case "$action" in
 
   "latest")
     # === latest   # === e.g.: 5.5.0
-    file="$(curl -s https://nodejs.org/download/release/index.tab)"
-    echo "$file" | head -n2 | tail -n 1 | cut -f1  | cut -d'v' -f2
+    cmd="curl -s https://nodejs.org/download/release/index.tab"
+    file="$($cmd)"
+    latest="$(echo "$file" | head -n2 | tail -n 1 | cut -f1  | cut -d'v' -f2 || :)"
+    if [[ -z "$latest" ]]; then
+      echo "!!! could not get latest node version: "
+      exit 1
+    fi
+    echo "$latest"
     ;;
+
+  "upgrade")
+    # === upgrade  # Currently, it's equivalent to "install"
+      $0 install
+      exit 0
+      ;;
 
   "install")
     # === install  # Installs: node_build, node
 
     # === install: node_build
     cd /progs
-    echo "=== Installing/updating node-build:"
+    echo -n "=== Installing/updating $(bash_setup colorize YELLOW node-build): "
     git_setup clone_or_pull https://github.com/nodenv/node-build /progs/
     node_build="/progs/node-build/bin/node-build"
 
@@ -285,11 +297,16 @@ case "$action" in
       echo "=== Installing node: $latest"
       $node_build "$latest" /progs/node/$latest
     fi
-    current="/progs/node/current"
-    if [[ -L "$current" ]]; then
-      rm "$current"
+
+    MSG="Installed:"
+    if [[ "$(readlink -f "$latest")" != "$(readlink -f "/progs/node/$latest")" ]]; then
+      current="/progs/node/current"
+      if [[ -L "$current" ]]; then
+        rm "$current"
+      fi
+      ln -s /progs/node/$latest "$current"
+      MSG="Already installed:"
     fi
-    ln -s /progs/node/$latest "$current"
 
     final="$(type node)"
     if [[ "$final" != */progs/node/current/* ]]; then
@@ -297,7 +314,7 @@ case "$action" in
       exit 1
     fi
 
-    echo "=== Installed: $(node -v) and $final"
+    echo "=== $MSG: $(bash_setup colorize YELLOW "$(node -v)") and $final"
     exit 0
     # === $ ... install VERSION
     # === Uses NVM to install a node version.
