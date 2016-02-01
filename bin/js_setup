@@ -261,11 +261,62 @@ case "$action" in
     $0 nvm "ls-remote"
     ;;
 
+
+  "latest")
+    # === latest   # === e.g.: 5.5.0
+    file="$(curl -s https://nodejs.org/download/release/index.tab)"
+    echo "$file" | head -n2 | tail -n 1 | cut -f1  | cut -d'v' -f2
+    ;;
+
   "install")
+    # === install  # Installs: node_build, node
+
+    # === install: node_build
+    cd /progs
+    echo "=== Installing/updating node-build:"
+    git_setup clone_or_pull https://github.com/nodenv/node-build /progs/
+    node_build="/progs/node-build/bin/node-build"
+
+    # === install: node
+    mkdir -p /progs/node/
+    latest="$($0 latest)"
+
+    if [[ ! -d /progs/node/$latest ]]; then
+      echo "=== Installing node: $latest"
+      $node_build "$latest" /progs/node/$latest
+    fi
+    current="/progs/node/current"
+    if [[ -L "$current" ]]; then
+      rm "$current"
+    fi
+    ln -s /progs/node/$latest "$current"
+
+    final="$(type node)"
+    if [[ "$final" != */progs/node/current/* ]]; then
+      echo "!!! Something went wrong: $final" 1>&2
+      exit 1
+    fi
+
+    echo "=== Installed: $(node -v) and $final"
+    exit 0
     # === $ ... install VERSION
     # === Uses NVM to install a node version.
-    $0 nvm install $@
+    # $0 nvm install $@
+    mkdir -p /progs/node
+    cd /progs/node
+    dir="node-${latest}-linux-x64"
+    archive="${dir}.tar.gz"
+    if [[ ! -d "$dir" ]]; then
+      rm -f "$archive"
+      wget "https://nodejs.org/dist/$latest/$archive"
+      tar xvzf "$archive"
+    fi
+    cd "$dir"
+    ./configure
+    make
+    make install
     ;;
+
 
   "nvm")
     if ! type nvm 2>/dev/null; then
