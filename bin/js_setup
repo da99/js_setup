@@ -34,7 +34,6 @@ case "$action" in
     echo " ====================================================="
     echo " $ js_setup   init_bower"
     echo " $ js_setup   jshint     file"
-    echo " $ js_setup   version    ..."
     echo ""
     echo " $ js_setup   js_zero    extended_regexp_for_grep"
     echo " $ js_setup   js_clean"
@@ -139,9 +138,10 @@ case "$action" in
     fi
     ;;
 
-  "version")
+  bump)
+    # === bump major|minor|patch
     git push
-    js_setup js_clean
+    $0 js_clean
 
     if [[ -f package.json ]]; then
       echo "=== Updating modules..."
@@ -166,16 +166,17 @@ case "$action" in
     fi
 
     if [[ -f bower.json ]]; then
-      bower version $@
-      git push origin "v$(node -p "require('./bower').version")"
+      bash_setup bump $@
     else
       if [[ -f package.json ]] ; then
         npm version $@
         git push origin "v$(node -p "require('./package.json').version")"
+        git push
+      else
+        echo "!!! Could not determine how to update version. No bower.json, package.json found." 1>&2
+        exit 1
       fi
     fi
-
-    git push
     ;;
 
   "mocha")
@@ -255,14 +256,15 @@ case "$action" in
     # echo -e "${RED}Fail${RESET_COLOR}"
     ;;
 
-  "list")
+
+  list)
     # === $ ... list
     # === Prints available remote node versions.
     $0 nvm "ls-remote"
     ;;
 
 
-  "latest")
+  latest)
     # === latest   # === e.g.: 5.5.0
     cmd="curl -s https://nodejs.org/download/release/index.tab"
     file="$($cmd)"
@@ -274,7 +276,7 @@ case "$action" in
     echo "$latest"
     ;;
 
-  "upgrade")
+  upgrade)
     # === upgrade  # Currently, it's equivalent to "install"
       $0 install
       exit 0
