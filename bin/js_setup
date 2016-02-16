@@ -282,14 +282,17 @@ case "$action" in
       $node_build "$latest" /progs/node/$latest
     fi
 
-    MSG="Installed:"
-    if [[ "$(readlink -f "$latest")" != "$(readlink -f "/progs/node/$latest")" ]]; then
-      current="/progs/node/current"
+    MSG="Already installed:"
+    current="/progs/node/current"
+    if [[ "$(readlink -f "$current")" != "$(readlink -f "/progs/node/$latest")" ]]; then
       if [[ -L "$current" ]]; then
         rm "$current"
       fi
       ln -s /progs/node/$latest "$current"
-      MSG="Already installed:"
+      packages="jshint npm-check-updates bower"
+      npm install -g $packages
+      echo -n "=== Installing $(bash_setup colorize YELLOW $packages)... "
+      MSG="Installed:"
     fi
 
     final="$(type node)"
