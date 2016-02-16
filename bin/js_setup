@@ -259,9 +259,19 @@ case "$action" in
     ;;
 
   upgrade)
-    # === upgrade  # Currently, it's equivalent to "install"
-      $0 install
-      exit 0
+    # === upgrade  # Global if package.json, bower.json not found.
+      if [[ -f package.json ]]; then
+        npm update --save
+        ncu -u
+      fi
+      if [[ -f bower.json ]]; then
+        ncu -m bower
+      fi
+      if [[ ! -f package.json && ! -f bower.json ]]; then
+        $0 install
+        echo "=== Checking npm global packages"
+        npm outdated -g
+      fi
       ;;
 
   "install")
