@@ -282,6 +282,7 @@ case "$action" in
   upgrade)
     # === upgrade  # Global if package.json, bower.json not found.
       if [[ -f package.json ]]; then
+        npm prune
         npm update --save
         ncu -u
       fi
