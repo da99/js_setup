@@ -226,6 +226,7 @@ case "$action" in
       echo -e "=== jshint ${Bold}${path}${Reset}: " \
         && jshint $path && is_fine="yes" \
         && tput cuu1                     \
+        && tput el                       \
         && echo -e "=== jshint ${Bold}${path}${Reset} ${Bold}${Green}@${Reset} $stamp"; \
       } \
       || \
