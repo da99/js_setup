@@ -142,7 +142,11 @@ case "$action" in
       #     modules are found. "npm prune" takes care
       #     of this.
       npm prune
-      npm shrinkwrap
+      if grep --extended-regexp ':\s+"latest' package.json ; then
+        echo "=== Skipping shrinkwrap because \"latest\" string found in package.json" 1>&2
+      else
+        npm shrinkwrap
+      fi
     fi
 
     if [[ ! -f specs.html ]]; then
