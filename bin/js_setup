@@ -377,6 +377,13 @@ case "$action" in
     ;;
 
   *)
+    func_file="$THIS_DIR/bin/functions/${action}.sh"
+    if [[ -s "$func_file" ]]; then
+      source "$func_file"
+      "$action" $@
+      exit 0
+    fi
+
     echo "Unknown option: $action" 1>&2
     exit 1
     ;;
