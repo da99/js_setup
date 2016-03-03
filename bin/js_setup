@@ -222,16 +222,31 @@ case "$action" in
     ;;
 
   "jshint")
-    path="$1"; shift
+    # === {{CMD}}  file1
+    # === {{CMD}}  file1  file2  file3...
+    # === {{CMD}}  my/files/*.js
     stamp="$(date '+%r')"
 
-    is_fine=""
+    # === We have to make sure each file exists.
+    #     jshint will still exit 0 if file is not found.
+    FILES=( )
+    while [[ -n "$@" ]]; do
+      FILE="$1"; shift
+      if [[ ! -f "$FILE" ]]; then
+        echo -e "!!! ${Red}Not a file${Color_Off}: $FILE" 1>&2
+        exit 1
+      fi
+      set +u
+      FILES=("${FILES[@]}" "$FILE")
+      set -u
+    done
+
+    echo -e "=== jshint ${Bold}${FILES[@]}${Reset}: "
     {
-      echo -e "=== jshint ${Bold}${path}${Reset}: " \
-        && jshint $path && is_fine="yes" \
+        jshint "${FILES[@]}"            \
         && tput cuu1                     \
-        && tput el                       \
-        && echo -e "=== jshint ${Bold}${path}${Reset} ${Bold}${Green}@${Reset} $stamp"; \
+        && tput el                        \
+        && echo -e "=== jshint ${Bold}${FILES[@]}${Reset} ${Bold}${Green}@${Reset} $stamp"; \
       } \
       || \
       { stat=$?; echo -e "${Red}Failed${Reset}"; exit $stat; }
