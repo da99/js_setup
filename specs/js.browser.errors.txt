@@ -1,0 +1,4 @@
+sdfdsf is not defined
+ReferenceError: sdfdsf is not defined
+    at spec (http://localhost:4567/build/browser.js:178:3)
+    at http://localhost:4567/run.specs.js:8:3
