@@ -322,7 +322,7 @@ case "$action" in
     # === install: node_build
     cd /progs
     echo -n "=== Installing/updating $(bash_setup colorize YELLOW node-build): "
-    git_setup clone_or_pull https://github.com/nodenv/node-build /progs/
+    git_setup clone-or-pull https://github.com/nodenv/node-build /progs/
     node_build="/progs/node-build/bin/node-build"
 
     # === install: node
