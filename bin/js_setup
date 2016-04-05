@@ -228,13 +228,14 @@ case "$action" in
     # === {{CMD}}  my/files/*.js
     stamp="$(date '+%r')"
 
+
     # === We have to make sure each file exists.
     #     jshint will still exit 0 if file is not found.
-    FILES=( )
+    declare -a FILES
     while [[ -n "$@" ]]; do
       FILE="$1"; shift
       if [[ ! -f "$FILE" ]]; then
-        echo -e "!!! ${Red}Not a file${Color_Off}: $FILE" 1>&2
+        mksh_setup RED "!!! {{Not a file}}: $FILE"
         exit 1
       fi
       set +u
@@ -242,15 +243,17 @@ case "$action" in
       set -u
     done
 
-    echo -e "=== jshint ${Bold}${FILES[@]}${Reset}: "
+    mksh_setup RED "=== jshint {{${FILES[@]}}}: "
     {
-        jshint "${FILES[@]}"            \
+      jshint "${FILES[@]}"            \
         && tput cuu1                     \
         && tput el                        \
         && echo -e "=== jshint ${Bold}${FILES[@]}${Reset} ${Bold}${Green}@${Reset} $stamp"; \
-      } \
-      || \
-      { stat=$?; echo -e "${Red}Failed${Reset}"; exit $stat; }
+      } || {
+      stat=$?
+      echo -e "${Red}Failed${Reset}"
+      exit $stat
+    }
     ;;
 
   "jshint!")

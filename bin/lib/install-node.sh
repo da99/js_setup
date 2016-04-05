@@ -28,7 +28,7 @@ install-node () {
       rm "$current"
     fi
     ln -s /progs/node/$latest "$current"
-    packages="jshint npm-check-updates bower"
+    packages="jshint npm-check-updates bower eslint"
     npm install -g $packages
     echo -n "=== Installing $(bash_setup colorize YELLOW $packages)... "
     MSG="Installed:"
