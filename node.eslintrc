@@ -1,7 +1,11 @@
 
 {
   extends: "eslint:recommended",
- rules: {
-   "no-unused-vars": ["error", { "vars": "local" }]
- }
+  "env": {
+    node: true,
+    es6: true
+  },
+  rules: {
+    "no-unused-vars": ["error", { "vars": "local" }]
+  }
 }
