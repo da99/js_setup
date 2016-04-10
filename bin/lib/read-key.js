@@ -9,7 +9,7 @@ const KEY=process.argv[3];
 const O = JSON.parse(FS.readFileSync(FILE).toString());
 
 if (!O.hasOwnProperty(KEY)) {
-  console.error("!!! Key not found: " + KEY);
+  console.error("!!! Key not found: " + KEY + " in " + FILE);
   process.exit(1);
 }
 

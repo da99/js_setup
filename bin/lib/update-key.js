@@ -7,11 +7,10 @@ const FILE=PATH.resolve(process.argv[2]);
 const KEY=process.argv[3];
 const NEW_VALUE=process.argv[4];
 
-const O = require(FILE);
-
+const O = JSON.parse(FS.readFileSync(FILE).toString());
 
 if (!O.hasOwnProperty(KEY)) {
-  console.error("!!! Key not found: " + KEY);
+  console.error("!!! Key not found: " + KEY + " in " + FILE);
   process.exit(1);
 }
 
