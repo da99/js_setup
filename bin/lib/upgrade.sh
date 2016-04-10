@@ -11,10 +11,4 @@ upgrade () {
   if [[ -f bower.json ]]; then
     ncu -m bower
   fi
-
-  if [[ ! -f package.json && ! -f bower.json ]]; then
-    $0 install
-    echo "=== Checking npm global packages"
-    npm outdated -g
-  fi
 } # === end function
