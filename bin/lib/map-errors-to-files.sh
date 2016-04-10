@@ -5,6 +5,7 @@
 # when js errors file names are some/file.js:100:8
 
 # === node my-script 2>&1 | {{CMD}}
+# === node my-script 2>&1 | {{CMD}}  "lib/to/search"  "lib/another/lib/to/search"
 map-errors-to-files () {
 
   local +x Color_Off='\e[0m'
@@ -38,7 +39,9 @@ map-errors-to-files () {
 
     ag_results=""
     if [[ -n "$line" ]]; then
+      IFS=' '
       ag_results="$(ag --follow --vimgrep --literal "$line" $dirs || :)"
+      IFS=$'\n'
     fi
 
     if [[ -z "$ag_results" ]]; then
