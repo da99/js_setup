@@ -1,9 +1,16 @@
 
 # === {{CMD}}  major|minor|patch
 bump-commit () {
-  git push
+
+  if [[ ! -f bower.json && ! -f package.json ]]; then
+    mksh_setup RED "!!! Could not determine how to {{bump version}}. No bower.json, package.json found."
+    exit 1
+  fi
+
   $0 upgrade
   $0 js_clean
+
+  local +x NEW_VERSION="$(git_setup bump $@)"
 
   if [[ -f package.json ]]; then
     echo "=== NPM shrinkwrapping modules..."
@@ -19,8 +26,15 @@ bump-commit () {
       npm shrinkwrap
       git add npm-shrinkwrap.json
       git commit -m "Shrinkwrapped npm modules."
-      git push
     fi
+
+    if [[ -f package.json ]] ; then
+      js_setup update-key "package.json" "version" "$NEW_VERSION"
+      git add package.json
+      git commit -m "Bump: package.json -> $NEW_VERSION"
+    fi
+
+    git push
   fi # === package.json
 
   if ! git_repo_is_clean; then
@@ -29,15 +43,5 @@ bump-commit () {
     exit 1
   fi
 
-  if [[ ! -f bower.json && ! -f package.json ]]; then
-    mksh_setup RED "!!! Could not determine how to {{bump version}}. No bower.json, package.json found."
-    exit 1
-  fi
-
-  if [[ -f package.json ]] ; then
-    npm version $@
-    git push origin "v$(node -p "require('./package.json').version")"
-    git push
-  fi
-
+  git_setup bump-commit "$@"
 } # === end function
