@@ -131,51 +131,6 @@ case "$action" in
     # bash_setup mush_unless_exists "$TEMPLATES/specs.html" "specs.html"
     ;;
 
-  bump)
-    # === bump major|minor|patch
-    git push
-    $0 js_clean
-
-    if [[ -f package.json ]]; then
-      echo "=== Updating modules..."
-      npm update
-      # === "npm shrinkwrap" will fail if extraneous
-      #     modules are found. "npm prune" takes care
-      #     of this.
-      npm prune
-      if grep --extended-regexp ':\s+"latest' package.json ; then
-        echo "=== Skipping shrinkwrap because \"latest\" string found in package.json" 1>&2
-      else
-        npm shrinkwrap
-      fi
-    fi
-
-    if [[ ! -f specs.html ]]; then
-      if [[ -f specs.js ]]; then
-        $0 mocha specs.js
-      fi
-    fi
-
-    if ! git_repo_is_clean; then
-      echo "=== Git repo is not clean" 1>&2
-      git status
-      exit 1
-    fi
-
-    if [[ -f bower.json ]]; then
-      bash_setup bump $@
-    else
-      if [[ -f package.json ]] ; then
-        npm version $@
-        git push origin "v$(node -p "require('./package.json').version")"
-        git push
-      else
-        echo "!!! Could not determine how to update version. No bower.json, package.json found." 1>&2
-        exit 1
-      fi
-    fi
-    ;;
-
   "mocha")
     if [[ -z "$IS_DEV" ]]; then
       exit 1
@@ -302,23 +257,6 @@ case "$action" in
     fi
     echo "$latest"
     ;;
-
-  upgrade)
-    # === upgrade  # Global if package.json, bower.json not found.
-      if [[ -f package.json ]]; then
-        npm prune
-        npm update --save
-        ncu -u
-      fi
-      if [[ -f bower.json ]]; then
-        ncu -m bower
-      fi
-      if [[ ! -f package.json && ! -f bower.json ]]; then
-        $0 install
-        echo "=== Checking npm global packages"
-        npm outdated -g
-      fi
-      ;;
 
   "install")
     $THIS_SCRIPT install-node
