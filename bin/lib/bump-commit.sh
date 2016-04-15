@@ -2,6 +2,11 @@
 # === {{CMD}}  major|minor|patch
 bump-commit () {
 
+  if [[ "$PWD" != "$THIS_DIR" && ( -f bin/lib/bump.sh || -f bin/lib/bump-commit.sh ) ]]; then
+    mksh_setup ORANGE "=== Use {{$(basename $PWD) $(find bin/lib -type f -name "bump*" | sort -r | head -n 1 | xargs -I FILE basename FILE .sh)}}"
+    exit 1
+  fi
+
   if [[ ! -f bower.json && ! -f package.json ]]; then
     mksh_setup RED "!!! Could not determine how to {{bump version}}. No bower.json, package.json found."
     exit 1
