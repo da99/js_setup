@@ -1,10 +1,4 @@
 
-# === {{CMD}}  file   key   new_value
-update-key () {
-  node "$THIS_DIR"/bin/lib/update-key.js  "$@"
-} # === end function
-
-
 specs () {
   local +x TEMP="/tmp/js_setup/update-key"
   rm -rf "$TEMP"
@@ -17,3 +11,5 @@ specs () {
   should-match '{"version":"v2.0.0"}'  "$(cat file.json)"  "update-key file key val"
 
 } # === specs
+
+specs

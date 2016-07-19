@@ -1,10 +1,4 @@
 
-# === {{CMD}}  file  KEY
-read-key () {
-  node "$THIS_DIR"/bin/lib/read-key.js  "$@"
-} # === end function
-
-
 specs () {
 
   local +x TEMP="$(mktemp)"
@@ -16,3 +10,4 @@ specs () {
   rm -f "$TEMP"
 
 } # === specs ()
+specs
