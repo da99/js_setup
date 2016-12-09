@@ -18,7 +18,7 @@ eslint () {
   command eslint -c "$CONFIG" "$@" || {
     STAT=$?
     if ! which --skip-functions eslint; then
-      mksh_setup BOLD "=== Installing: {{eslint}}" >&2
+      sh_color BOLD "=== Installing: {{eslint}}" >&2
       npm install -g eslint >&2
       $0 eslint "$@"
     fi

@@ -8,7 +8,7 @@ install-node () {
 
   # === install: node_build
   cd /progs
-  echo -n "=== Installing/updating $(bash_setup colorize YELLOW node-build): "
+  echo -n "=== Installing/updating $(sh_color colorize YELLOW node-build): "
   git_setup clone-or-pull https://github.com/nodenv/node-build /progs/
   node_build="/progs/node-build/bin/node-build"
 
@@ -30,7 +30,7 @@ install-node () {
     ln -s /progs/node/$latest "$current"
     packages="jshint npm-check-updates bower eslint"
     npm install -g $packages
-    echo -n "=== Installing $(bash_setup colorize YELLOW $packages)... "
+    echo -n "=== Installing $(sh_color colorize YELLOW $packages)... "
     MSG="Installed:"
   fi
 
@@ -40,7 +40,7 @@ install-node () {
     exit 1
   fi
 
-  echo "=== $MSG: $(bash_setup colorize YELLOW "$(node -v)") and $final"
+  echo "=== $MSG: $(sh_color colorize YELLOW "$(node -v)") and $final"
   exit 0
   # === $ ... install VERSION
   # === Uses NVM to install a node version.
@@ -62,7 +62,7 @@ install-node () {
   local LATEST="$( ls $PREFIX | grep -P '^\d+\.\d+\.\d+$' | sort -r | head -n 1 )"
   local OLD="$( ls $PREFIX | grep -P '^\d+\.\d+\.\d+$' | sort -r | tail -n 1 )"
   if [[ "$OLD" != "$LATEST" ]]; then
-    bash_setup BOLD "=== Trashing: {{$OLD}}"
+    sh_color BOLD "=== Trashing: {{$OLD}}"
     trash-put "$PREFIX/$OLD"
   fi
 } # === end function
