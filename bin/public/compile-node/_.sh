@@ -25,7 +25,7 @@ compile-node () {
   fi # === if $ARCH
 
   mkdir -p "$PREFIX"
-  cd "$PREFIX"
+  cd "/progs"
   if [[ -d node-src ]]; then
     cd node-src
     git checkout master
@@ -52,8 +52,9 @@ compile-node () {
 		--shared-http-parser \
 		--shared-libuv
 
-  make LDFLAGS+=-ldl
-  make LDFLAGS+=-ldl install
+  local +x CPU_COUNT=$(grep -c ^processor /proc/cpuinfo)
+  make -j $CPU_COUNT LDFLAGS+=-ldl
+  make -j $CPU_COUNT LDFLAGS+=-ldl install
 
   "$PREFIX"/bin/node -v
 } # === end function
