@@ -30,7 +30,7 @@ install-node () {
   # === install: node_build
   cd /progs
   echo -n "=== Installing/updating $(sh_color YELLOW node-build): "
-  git_setup clone-or-pull https://github.com/nodenv/node-build /progs/
+  my_git clone-or-pull https://github.com/nodenv/node-build /progs/
   node_build="/progs/node-build/bin/node-build"
 
   # === install: node
