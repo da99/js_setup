@@ -5,9 +5,11 @@
 action="$1"
 shift
 set -u -e -o pipefail
-THIS_DIR="$(bash_setup dirname_of_bin "$0")"
+THIS_DIR="$(dirname "$(dirname "$(realpath "$0")")")"
 THIS_SCRIPT="$0"
 TEMPLATES="$THIS_DIR/templates"
+PATH="$PATH:$THIS_DIR/../mksh_setup/bin"
+PATH="$PATH:$THIS_DIR/../my_bash/bin"
 
 Color_Off='\e[0m'
 Bold="$(tput bold)"
@@ -120,15 +122,13 @@ case "$action" in
     export NAME="$name"
     mkdir -p bin
 
-    bash_setup cp_unless_exists "$TEMPLATES/_gitignore" ".gitignore"
-    bash_setup new_bin
+    if [[ ! -e ".gitignore" ]]; then
+      cp -i "$TEMPLATES/_gitignore" ".gitignore"
+    fi
+    mksh_setup new-bin
 
     chmod +x "bin/$name"
 
-    # bash_setup mush_unless_exists "$TEMPLATES/bin"        "bin/$name"
-    # bash_setup cp_unless_exists "$TEMPLATES/_bowerrc"   ".bowerrc"
-    # bash_setup cp_unless_exists "$TEMPLATES/specs.js"   "specs.js"
-    # bash_setup mush_unless_exists "$TEMPLATES/specs.html" "specs.html"
     ;;
 
   "mocha")
