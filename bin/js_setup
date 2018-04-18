@@ -73,11 +73,11 @@ case "$action" in
   "add_dev_log")
     file="$1"
     shift
-    echo -e "\n\n/* global process */\nvar log; log = function (...args) {\n  return (process.env.IS_DEV) ? console.log.apply(console, args) : null;\n};" >> $file
+    echo -e "\n\n/* global process */\nvar log; log = function (...args) {\n  return (process.env.IS_DEVELOPMENT) ? console.log.apply(console, args) : null;\n};" >> $file
     exit 0
 
     if ! grep "var log;" "$file" 1>/dev/null; then
-      output=$(sed '/^$/a var log;\nlog = function () {\n  return (process.env.IS_DEV) ? console.log.apply(console, arguments) : null;\n};' $file)
+      output=$(sed '/^$/a var log;\nlog = function () {\n  return (process.env.IS_DEVELOPMENT) ? console.log.apply(console, arguments) : null;\n};' $file)
       echo -e "$output" > $file
     fi
     ;;
@@ -132,7 +132,7 @@ case "$action" in
     ;;
 
   "mocha")
-    if [[ -z "$IS_DEV" ]]; then
+    if [[ -z "$IS_DEVELOPMENT" ]]; then
       exit 1
     fi
     echo "=== node_modules/mocha/bin/mocha --es_staging "$@""
